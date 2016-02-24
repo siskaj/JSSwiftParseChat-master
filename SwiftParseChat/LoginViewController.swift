@@ -49,7 +49,7 @@ class LoginViewController: UITableViewController, UITextFieldDelegate {
     
     func login() {
         let email = emailField.text!.lowercaseString
-        let password = passwordField.text
+        let password = passwordField.text!
         
         if email.characters.count == 0 {
             ProgressHUD.showError("Email field is empty.")
@@ -59,14 +59,14 @@ class LoginViewController: UITableViewController, UITextFieldDelegate {
         }
         
         ProgressHUD.show("Signing in...", interaction: true)
-        PFUser.logInWithUsernameInBackground(email, password: password) { (user: PFUser!, error: NSError!) -> Void in
+        PFUser.logInWithUsernameInBackground(email, password: password) { (user: PFUser?, error: NSError?) -> Void in
             if user != nil {
                 PushNotication.parsePushUserAssign()
-                ProgressHUD.showSuccess("Welcome back, \(user[PF_USER_FULLNAME])!")
+                ProgressHUD.showSuccess("Welcome back, \(user![PF_USER_FULLNAME])!")
                 self.dismissViewControllerAnimated(true, completion: nil)
             } else {
-                if let info = error.userInfo {
-                    ProgressHUD.showError(info["error"] as! String)
+                if let error = error {
+                    ProgressHUD.showError(error.userInfo["error"] as! String)
                 }
             }
         }

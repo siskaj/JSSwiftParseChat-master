@@ -30,16 +30,16 @@ class SearchViewController: UITableViewController, UISearchBarDelegate {
     }
     
     func loadUsers() {
-        let user = PFUser.currentUser()
+        let user = PFUser.currentUser()!
         
         let query = PFQuery(className: PF_USER_CLASS_NAME)
-        query.whereKey(PF_USER_OBJECTID, notEqualTo: user.objectId)
+        query.whereKey(PF_USER_OBJECTID, notEqualTo: user.objectId!)
         query.orderByAscending(PF_USER_FULLNAME)
         query.limit = 1000
-        query.findObjectsInBackgroundWithBlock { (objects: [AnyObject]!, error: NSError!) -> Void in
+        query.findObjectsInBackgroundWithBlock { objects, error in
             if error == nil {
                 self.users.removeAll(keepCapacity: false)
-                self.users += objects as! [PFUser]!
+                self.users += objects as! [PFUser]
                 self.tableView.reloadData()
             } else {
                 ProgressHUD.showError("Network error")
@@ -48,17 +48,17 @@ class SearchViewController: UITableViewController, UISearchBarDelegate {
     }
     
     func searchUsers(searchString: String) {
-        let user = PFUser.currentUser()
+        let user = PFUser.currentUser()!
         
         let query = PFQuery(className: PF_USER_CLASS_NAME)
-        query.whereKey(PF_USER_OBJECTID, notEqualTo: user.objectId)
+        query.whereKey(PF_USER_OBJECTID, notEqualTo: user.objectId!)
         query.whereKey(PF_USER_FULLNAME_LOWER, containsString: searchString)
         query.orderByAscending(PF_USER_FULLNAME)
         query.limit = 1000
-        query.findObjectsInBackgroundWithBlock { (objects: [AnyObject]!, error: NSError!) -> Void in
+        query.findObjectsInBackgroundWithBlock { objects, error in
             if error == nil {
                 self.users.removeAll(keepCapacity: false)
-                self.users += objects as! [PFUser]!
+                self.users += objects as! [PFUser]
                 self.tableView.reloadData()
             } else {
                 ProgressHUD.showError("Network error")
@@ -81,7 +81,7 @@ class SearchViewController: UITableViewController, UISearchBarDelegate {
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        var cell = tableView.dequeueReusableCellWithIdentifier("cell")
+        let cell = tableView.dequeueReusableCellWithIdentifier("cell")
         
         let user = self.users[indexPath.row]
         cell!.textLabel?.text = user[PF_USER_FULLNAME] as? String
@@ -94,7 +94,7 @@ class SearchViewController: UITableViewController, UISearchBarDelegate {
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
         
-        let user1 = PFUser.currentUser()
+        let user1 = PFUser.currentUser()!
         let user2 = users[indexPath.row]
         let groupId = Messages.startPrivateChat(user1, user2: user2)
         

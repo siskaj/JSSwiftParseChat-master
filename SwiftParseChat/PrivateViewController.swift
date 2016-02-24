@@ -10,7 +10,7 @@ import UIKit
 import AddressBook
 import MessageUI
 
-class PrivateViewController: UITableViewController, UITableViewDelegate, UITableViewDataSource, UIActionSheetDelegate, MFMailComposeViewControllerDelegate, MFMessageComposeViewControllerDelegate {
+class PrivateViewController: UITableViewController, UIActionSheetDelegate, MFMailComposeViewControllerDelegate, MFMessageComposeViewControllerDelegate {
     
     var users1 = [APContact]()
     var users2 = [PFUser]()
@@ -70,14 +70,14 @@ class PrivateViewController: UITableViewController, UITableViewDelegate, UITable
             }
         }
         
-        let user = PFUser.currentUser()
+        let user = PFUser.currentUser()!
         
         let query = PFQuery(className: PF_USER_CLASS_NAME)
-        query.whereKey(PF_USER_OBJECTID, notEqualTo: user.objectId)
+        query.whereKey(PF_USER_OBJECTID, notEqualTo: user.objectId!)
         query.whereKey(PF_USER_EMAILCOPY, containedIn: emails)
         query.orderByAscending(PF_USER_FULLNAME)
         query.limit = 1000
-        query.findObjectsInBackgroundWithBlock { (objects: [AnyObject]!, error: NSError!) -> Void in
+        query.findObjectsInBackgroundWithBlock { objects, error in
             if error == nil {
                 self.users2.removeAll(keepCapacity: false)
                 for user in objects as! [PFUser]! {
@@ -136,7 +136,7 @@ class PrivateViewController: UITableViewController, UITableViewDelegate, UITable
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        var cell = tableView.dequeueReusableCellWithIdentifier("cell") as! UITableViewCell
+        let cell = tableView.dequeueReusableCellWithIdentifier("cell")!
         
         if indexPath.section == 0 {
             let user = users2[indexPath.row]
@@ -161,7 +161,7 @@ class PrivateViewController: UITableViewController, UITableViewDelegate, UITable
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
         
         if indexPath.section == 0 {
-            let user1 = PFUser.currentUser()
+            let user1 = PFUser.currentUser()!
             let user2 = users2[indexPath.row]
             let groupId = Messages.startPrivateChat(user1, user2: user2)
             
@@ -192,7 +192,7 @@ class PrivateViewController: UITableViewController, UITableViewDelegate, UITable
         
         if emailsCount > 0 && phonesCount > 0 {
             let actionSheet = UIActionSheet(title: nil, delegate: self, cancelButtonTitle: "Cancel", destructiveButtonTitle: nil, otherButtonTitles: "Email invitation", "SMS invitation")
-            actionSheet.showFromTabBar(self.tabBarController?.tabBar)
+            actionSheet.showFromTabBar((self.tabBarController?.tabBar)!)
         } else if emailsCount > 0 && phonesCount == 0 {
             self.sendMail(user)
         } else if emailsCount == 0 && phonesCount > 0 {

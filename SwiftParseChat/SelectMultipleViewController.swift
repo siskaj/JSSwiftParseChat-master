@@ -32,15 +32,15 @@ class SelectMultipleViewController: UITableViewController {
     // MARK: - Backend methods
     
     func loadUsers() {
-        let user = PFUser.currentUser()
+        let user = PFUser.currentUser()!
         let query = PFQuery(className: PF_USER_CLASS_NAME)
-        query.whereKey(PF_USER_OBJECTID, notEqualTo: user.objectId)
+        query.whereKey(PF_USER_OBJECTID, notEqualTo: user.objectId!)
         query.orderByAscending(PF_USER_FULLNAME)
         query.limit = 1000
-        query.findObjectsInBackgroundWithBlock { (objects: [AnyObject]!, error: NSError!) -> Void in
+        query.findObjectsInBackgroundWithBlock { objects, error in
             if error == nil {
                 self.users.removeAll(keepCapacity: false)
-                self.users += objects as! [PFUser]!
+                self.users += objects as! [PFUser]
                 self.tableView.reloadData()
             } else {
                 ProgressHUD.showError("Network error")
@@ -61,11 +61,11 @@ class SelectMultipleViewController: UITableViewController {
             self.dismissViewControllerAnimated(true, completion: { () -> Void in
                 var selectedUsers = [PFUser]()
                 for user in self.users {
-                    if self.selection.contains(user.objectId) {
+                    if self.selection.contains(user.objectId!) {
                         selectedUsers.append(user)
                     }
                 }
-                selectedUsers.append(PFUser.currentUser())
+                selectedUsers.append(PFUser.currentUser()!)
                 self.delegate.didSelectMultipleUsers(selectedUsers)
             })
         }
@@ -91,7 +91,7 @@ class SelectMultipleViewController: UITableViewController {
         let user = self.users[indexPath.row]
         cell.textLabel?.text = user[PF_USER_FULLNAME] as? String
         
-        let selected = self.selection.contains(user.objectId)
+        let selected = self.selection.contains(user.objectId!)
         cell.accessoryType = selected ? UITableViewCellAccessoryType.Checkmark : UITableViewCellAccessoryType.None
         
         return cell
@@ -103,13 +103,13 @@ class SelectMultipleViewController: UITableViewController {
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
         
         let user = self.users[indexPath.row]
-        let selected = self.selection.contains(user.objectId)
+        let selected = self.selection.contains(user.objectId!)
         if selected {
-            if let index = self.selection.indexOf(user.objectId) {
+            if let index = self.selection.indexOf(user.objectId!) {
                 self.selection.removeAtIndex(index)
             }
         } else {
-            self.selection.append(user.objectId)
+            self.selection.append(user.objectId!)
         }
         
         self.tableView.reloadData()

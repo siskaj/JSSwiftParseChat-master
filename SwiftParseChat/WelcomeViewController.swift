@@ -9,6 +9,7 @@
 import UIKit
 import Alamofire
 
+
 class WelcomeViewController: UIViewController {
     
     override func viewDidLoad() {
@@ -23,17 +24,17 @@ class WelcomeViewController: UIViewController {
     
     @IBAction func facebookLogin(sender: UIButton) {
         ProgressHUD.show("Signing in...", interaction: false)
-        PFFacebookUtils.logInWithPermissions(["public_profile", "email", "user_friends"], block: { (user: PFUser!, error: NSError!) -> Void in
+        PFFacebookUtils.logInInBackgroundWithReadPermissions(["public_profile", "email", "user_friends"], block: { user, error in
             if user != nil {
-                if user[PF_USER_FACEBOOKID] == nil {
-                    self.requestFacebook(user)
+                if user![PF_USER_FACEBOOKID] == nil {
+                    self.requestFacebook(user!)
                 } else {
-                    self.userLoggedIn(user)
+                    self.userLoggedIn(user!)
                 }
             } else {
                 if error != nil {
                     print(error)
-                  print(error.userInfo)
+                  print(error!.userInfo)
 //                    if let info = error.userInfo {
 //                        print(info)
 //                    }
@@ -44,8 +45,8 @@ class WelcomeViewController: UIViewController {
     }
     
     func requestFacebook(user: PFUser) {
-        let request = FBRequest.requestForMe()
-        request.startWithCompletionHandler { (connection: FBRequestConnection!, result: AnyObject!, error: NSError!) -> Void in
+      let request = FBSDKGraphRequest(graphPath: "me", parameters:["fields" : "id, name, email"])
+        request.startWithCompletionHandler { (connection: FBSDKGraphRequestConnection!, result: AnyObject!, error: NSError!) -> Void in
             if error == nil {
                 let userData = result as! [String: AnyObject]!
                 self.processFacebook(user, userData: userData)
@@ -66,13 +67,13 @@ class WelcomeViewController: UIViewController {
             (request, response, data, error) in
             
             if error == nil {
-                var image = UIImage(data: data! as! NSData)!
+                var image = UIImage(data: data! )!
                 
                 if image.size.width > 280 {
                     image = Images.resizeImage(image, width: 280, height: 280)!
                 }
-                var filePicture = PFFile(name: "picture.jpg", data: UIImageJPEGRepresentation(image, 0.6))
-                filePicture.saveInBackgroundWithBlock({ (success: Bool, error: NSError!) -> Void in
+                var filePicture = PFFile(name: "picture.jpg", data: UIImageJPEGRepresentation(image, 0.6)!)
+                filePicture!.saveInBackgroundWithBlock({ (success: Bool, error: NSError?) -> Void in
                     if error != nil {
                         ProgressHUD.showError("Error saving photo")
                     }
@@ -81,8 +82,8 @@ class WelcomeViewController: UIViewController {
                 if image.size.width > 60 {
                     image = Images.resizeImage(image, width: 60, height: 60)!
                 }
-                var fileThumbnail = PFFile(name: "thumbnail.jpg", data: UIImageJPEGRepresentation(image, 0.6))
-                fileThumbnail.saveInBackgroundWithBlock({ (success: Bool, error: NSError!) -> Void in
+                var fileThumbnail = PFFile(name: "thumbnail.jpg", data: UIImageJPEGRepresentation(image, 0.6)!)
+                fileThumbnail!.saveInBackgroundWithBlock({ (success: Bool, error: NSError?) -> Void in
                     if error != nil {
                         ProgressHUD.showError("Error saving thumbnail")
                     }
@@ -94,13 +95,13 @@ class WelcomeViewController: UIViewController {
                 user[PF_USER_FACEBOOKID] = userData["id"]
                 user[PF_USER_PICTURE] = filePicture
                 user[PF_USER_THUMBNAIL] = fileThumbnail
-                user.saveInBackgroundWithBlock({ (succeeded: Bool, error: NSError!) -> Void in
+                user.saveInBackgroundWithBlock({ (succeeded: Bool, error: NSError?) -> Void in
                     if error == nil {
                         self.userLoggedIn(user)
                     } else {
                         PFUser.logOut()
                         ProgressHUD.showError("Login error")
-                        print(error.userInfo["error"] as! String)
+                        print(error!.userInfo["error"] as! String)
                       
 //                        if let info = error!.userInfo {
 //                            ProgressHUD.showError("Login error")

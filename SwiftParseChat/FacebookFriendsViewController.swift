@@ -32,12 +32,12 @@ class FacebookFriendsViewController: UITableViewController {
     // MARK: - Backend methods
     
     func loadFacebook() {
-        if FBSession.activeSession().isOpen == false {
-            return
-        }
-        
-        let request = FBRequest.requestForMyFriends()
-        request.startWithCompletionHandler { (connection: FBRequestConnection!, result: AnyObject!, error: NSError!) -> Void in
+//        if FBSession.activeSession().isOpen == false {
+//            return
+//        }
+      
+      let request = FBSDKGraphRequest(graphPath: "me/friends?limit=5000", parameters: ["fields" : "id, name"])
+        request.startWithCompletionHandler { (connection: FBSDKGraphRequestConnection!, result: AnyObject!, error: NSError!) -> Void in
             if error == nil {
                 
                 var fbIds = [String]()
@@ -53,7 +53,7 @@ class FacebookFriendsViewController: UITableViewController {
                 query.whereKey(PF_USER_FACEBOOKID, containedIn: fbIds)
                 query.orderByAscending(PF_USER_FULLNAME)
                 query.limit = 1000
-                query.findObjectsInBackgroundWithBlock({ (objects: [AnyObject]!, error: NSError!) -> Void in
+                query.findObjectsInBackgroundWithBlock({ objects, error in
                     if error == nil {
                         self.users.removeAll(keepCapacity: false)
                         self.users += objects as! [PFUser]!

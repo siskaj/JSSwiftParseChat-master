@@ -79,18 +79,18 @@ class AddressBookViewController: UITableViewController, UIActionSheetDelegate, M
             }
         }
         
-        let user = PFUser.currentUser()
+        let user = PFUser.currentUser()!
         
         let query = PFQuery(className: PF_USER_CLASS_NAME)
-        query.whereKey(PF_USER_OBJECTID, notEqualTo: user.objectId)
+        query.whereKey(PF_USER_OBJECTID, notEqualTo: user.objectId!)
         query.whereKey(PF_USER_EMAILCOPY, containedIn: emails)
         query.orderByAscending(PF_USER_FULLNAME)
         query.limit = 1000
-        query.findObjectsInBackgroundWithBlock { (objects: [AnyObject]!, error: NSError!) -> Void in
-            if error == nil {
+        query.findObjectsInBackgroundWithBlock { (objects: [PFObject]?, error: NSError?) -> Void in
+            if error == nil && objects != nil  {
                 self.users2.removeAll(keepCapacity: false)
-                for user in objects as! [PFUser]! {
-                    self.users2.append(user)
+                for user in objects! {
+                    self.users2.append(user as! PFUser)
                     self.removeUser(user[PF_USER_EMAILCOPY] as! String)
                 }
                 self.tableView.reloadData()
@@ -149,7 +149,7 @@ class AddressBookViewController: UITableViewController, UIActionSheetDelegate, M
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        var cell = tableView.dequeueReusableCellWithIdentifier("cell")
+        let cell = tableView.dequeueReusableCellWithIdentifier("cell")
         
         if indexPath.section == 0 {
             let user = users2[indexPath.row]

@@ -78,14 +78,14 @@ class RegisterViewController: UITableViewController, UITextFieldDelegate {
         user[PF_USER_EMAILCOPY] = email
         user[PF_USER_FULLNAME] = name
         user[PF_USER_FULLNAME_LOWER] = name!.lowercaseString
-        user.signUpInBackgroundWithBlock { (succeeded: Bool, error: NSError!) -> Void in
+        user.signUpInBackgroundWithBlock { (succeeded: Bool, error: NSError?) -> Void in
             if error == nil {
                 PushNotication.parsePushUserAssign()
                 ProgressHUD.showSuccess("Succeeded.")
                 self.dismissViewControllerAnimated(true, completion: nil)
             } else {
 //                if userInfo = error.userInfo {
-                ProgressHUD.showError(error.userInfo["error"] as! String)
+                ProgressHUD.showError(error!.userInfo["error"] as! String)
 //                }
             }
         }
