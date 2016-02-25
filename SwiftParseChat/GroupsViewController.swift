@@ -36,7 +36,7 @@ class GroupsViewController: UITableViewController, UIAlertViewDelegate {
     func loadGroups() {
         let query = PFQuery(className: PF_GROUPS_CLASS_NAME)
         query.findObjectsInBackgroundWithBlock {
-            (objects: [AnyObject]!, error: NSError!)  in
+            (objects, error)  in
             if error == nil {
                 self.groups.removeAll()
                 self.groups.appendContentsOf(objects as! [PFObject]!)
@@ -65,7 +65,7 @@ class GroupsViewController: UITableViewController, UIAlertViewDelegate {
                 if text.characters.count > 0 {
                     let object = PFObject(className: PF_GROUPS_CLASS_NAME)
                     object[PF_GROUPS_NAME] = text
-                    object.saveInBackgroundWithBlock({ (success: Bool, error: NSError!) -> Void in
+                    object.saveInBackgroundWithBlock({ (success: Bool, error: NSError?) -> Void in
                         if success {
                             self.loadGroups()
                         } else {
@@ -89,29 +89,29 @@ class GroupsViewController: UITableViewController, UIAlertViewDelegate {
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        var cell = tableView.dequeueReusableCellWithIdentifier("cell") as! UITableViewCell
+        var cell = tableView.dequeueReusableCellWithIdentifier("cell")
         
         var group = self.groups[indexPath.row]
-        cell.textLabel?.text = group[PF_GROUPS_NAME] as? String
+        cell!.textLabel?.text = group[PF_GROUPS_NAME] as? String
         
         var query = PFQuery(className: PF_CHAT_CLASS_NAME)
-        query.whereKey(PF_CHAT_GROUPID, equalTo: group.objectId)
+        query.whereKey(PF_CHAT_GROUPID, equalTo: group.objectId!)
         query.orderByDescending(PF_CHAT_CREATEDAT)
         query.limit = 1000
-        query.findObjectsInBackgroundWithBlock { (objects: [AnyObject]!, error: NSError!) -> Void in
-            if let chat = objects.first as? PFObject {
+        query.findObjectsInBackgroundWithBlock { (objects: [PFObject]?, error: NSError?) -> Void in
+            if let chat = objects!.first {
                 let date = NSDate()
-                let seconds = date.timeIntervalSinceDate(chat.createdAt)
+                let seconds = date.timeIntervalSinceDate(chat.createdAt!)
                 let elapsed = Utilities.timeElapsed(seconds);
-                let countString = (objects.count > 1) ? "\(objects.count) messages" : "\(objects.count) message"
-                cell.detailTextLabel?.text = "\(countString) \(elapsed)"
+                let countString = (objects!.count > 1) ? "\(objects!.count) messages" : "\(objects!.count) message"
+                cell!.detailTextLabel?.text = "\(countString) \(elapsed)"
             } else {
-                cell.detailTextLabel?.text = "0 messages"
+                cell!.detailTextLabel?.text = "0 messages"
             }
-            cell.detailTextLabel?.textColor = UIColor.lightGrayColor()
+            cell!.detailTextLabel?.textColor = UIColor.lightGrayColor()
         }
         
-        return cell
+        return cell!
     }
     
     // MARK: - TableView Delegate
@@ -120,7 +120,7 @@ class GroupsViewController: UITableViewController, UIAlertViewDelegate {
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
         
         let group = self.groups[indexPath.row]
-        let groupId = group.objectId as String
+        let groupId = group.objectId! as String
         
         Messages.createMessageItem(PFUser(), groupId: groupId, description: group[PF_GROUPS_NAME] as! String)
         

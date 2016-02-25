@@ -8,19 +8,22 @@
 
 import UIKit
 // Parse and ParseFacebookUtils imported in SwiftParseChat-Bridging-Header.h
+import ParseFacebookUtilsV4
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate {
 
-    var window: UIWindow?
-
+  var window: UIWindow?
+  
+  var locationManager: CLLocationManager? = nil
+  var coordinate: CLLocationCoordinate2D?
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         Parse.enableLocalDatastore()
         Parse.setApplicationId("tu0A4h2TBnxJJm8YLUoZ98rCovW6htY8allF05pI", clientKey: "XzdRL5P5IsjsNo6rTuiWUOfBCgkdbzmGE6E0dtXv")
         // PFAnalytics.trackAppOpenedWithLaunchOptions(launchOptions)
         
-        PFFacebookUtils.initializeFacebook()
+        PFFacebookUtils.initializeFacebookWithApplicationLaunchOptions(launchOptions)
         
         if application.respondsToSelector(Selector("registerUserNotificationSettings:")) {
             let userNotificationTypes: UIUserNotificationType = ([UIUserNotificationType.Alert, UIUserNotificationType.Badge, UIUserNotificationType.Sound])
@@ -50,7 +53,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationDidBecomeActive(application: UIApplication) {
-        FBAppCall.handleDidBecomeActiveWithSession(PFFacebookUtils.session())
+      FBSDKAppEvents.activateApp()
+      Utilities.postNotification(NOTIFICATION_APP_STARTED)
+      locationManagerStart()
     }
 
     func applicationWillTerminate(application: UIApplication) {
@@ -60,7 +65,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // Mark: - Facebook response
     
     func application(application: UIApplication, openURL url: NSURL, sourceApplication: String?, annotation: AnyObject) -> Bool {
-        return FBAppCall.handleOpenURL(url, sourceApplication: sourceApplication, withSession: PFFacebookUtils.session())
+      return FBSDKApplicationDelegate.sharedInstance().application(application, openURL: url, sourceApplication: sourceApplication, annotation: annotation)
     }
     
     // Mark - Push Notification methods
@@ -68,7 +73,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: NSData) {
         let installation = PFInstallation.currentInstallation()
         installation.setDeviceTokenFromData(deviceToken)
-        installation.saveInBackgroundWithBlock { (succeeed: Bool, error: NSError!) -> Void in
+        installation.saveInBackgroundWithBlock { (succeeed: Bool, error: NSError?) -> Void in
             if error != nil {
                 print("didRegisterForRemoteNotificationsWithDeviceToken")
                 print(error)
@@ -92,5 +97,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         NSNotificationCenter.defaultCenter().postNotificationName("reloadMessages", object: nil)
     }
 
+  func locationManagerStart() {
+    if locationManager == nil {
+      locationManager = CLLocationManager()
+      locationManager?.delegate = self
+      locationManager?.desiredAccuracy = kCLLocationAccuracyBest
+      locationManager?.requestWhenInUseAuthorization()
+    }
+    locationManager?.startUpdatingLocation()
+  }
+  
+  func locationManagerStop() {
+    guard let locationManager = locationManager else { return }
+    locationManager.stopUpdatingLocation()
+  }
+  
+  // MARK: LocationManagerDelegate
+  func locationManager(manager: CLLocationManager, didUpdateToLocation newLocation: CLLocation, fromLocation oldLocation: CLLocation) {
+    coordinate = newLocation.coordinate
+  }
+  
+  func locationManager(manager: CLLocationManager, didFailWithError error: NSError) {
+    return
+  }
 }
 

@@ -77,7 +77,7 @@ class MessagesViewController: UITableViewController, UIActionSheetDelegate, Sele
         for message in self.messages {
             total += message[PF_MESSAGES_COUNTER].integerValue
         }
-        var item = (self.tabBarController?.tabBar.items?[1])! as UITabBarItem
+        let item = (self.tabBarController?.tabBar.items?[1])! as UITabBarItem
         item.badgeValue = (total == 0) ? nil : "\(total)"
     }
     
@@ -109,16 +109,16 @@ class MessagesViewController: UITableViewController, UIActionSheetDelegate, Sele
             let groupId = sender as! String
             chatVC.groupId = groupId
         } else if segue.identifier == "selectSingleSegue" {
-            let selectSingleVC = segue.destinationViewController.topViewController as! SelectSingleViewController
+            let selectSingleVC = (segue.destinationViewController as! UINavigationController).topViewController as! SelectSingleViewController
             selectSingleVC.delegate = self
         } else if segue.identifier == "selectMultipleSegue" {
-            let selectMultipleVC = segue.destinationViewController.topViewController as! SelectMultipleViewController
+            let selectMultipleVC = (segue.destinationViewController as! UINavigationController).topViewController as! SelectMultipleViewController
             selectMultipleVC.delegate = self
         } else if segue.identifier == "addressBookSegue" {
-            let addressBookVC = segue.destinationViewController.topViewController as! AddressBookViewController
+            let addressBookVC = (segue.destinationViewController as! UINavigationController).topViewController as! AddressBookViewController
             addressBookVC.delegate = self
         } else if segue.identifier == "facebookFriendsSegue" {
-            let facebookFriendsVC = segue.destinationViewController.topViewController as! FacebookFriendsViewController
+            let facebookFriendsVC = (segue.destinationViewController as! UINavigationController).topViewController as! FacebookFriendsViewController
             facebookFriendsVC.delegate = self
         }
     }
@@ -146,7 +146,7 @@ class MessagesViewController: UITableViewController, UIActionSheetDelegate, Sele
     
     func didSelectSingleUser(user2: PFUser) {
         let user1 = PFUser.currentUser()
-        let groupId = Messages.startPrivateChat(user1, user2: user2)
+        let groupId = Messages.startPrivateChat(user1!, user2: user2)
         self.openChat(groupId)
     }
     
@@ -161,7 +161,7 @@ class MessagesViewController: UITableViewController, UIActionSheetDelegate, Sele
     
     func didSelectAddressBookUser(user2: PFUser) {
         let user1 = PFUser.currentUser()
-        let groupId = Messages.startPrivateChat(user1, user2: user2)
+        let groupId = Messages.startPrivateChat(user1!, user2: user2)
         self.openChat(groupId)
     }
     
@@ -169,7 +169,7 @@ class MessagesViewController: UITableViewController, UIActionSheetDelegate, Sele
     
     func didSelectFacebookUser(user2: PFUser) {
         let user1 = PFUser.currentUser()
-        let groupId = Messages.startPrivateChat(user1, user2: user2)
+        let groupId = Messages.startPrivateChat(user1!, user2: user2)
         self.openChat(groupId)
     }
     

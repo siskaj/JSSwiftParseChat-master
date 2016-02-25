@@ -8,7 +8,7 @@
 
 #import <Parse/Parse.h>
 #import <ParseUI/ParseUI.h>
-#import <ParseFacebookUtilsV4/ParseFacebookUtilsV4.h>
+//#import <ParseFacebookUtilsV4/PFFacebookUtils.h>
 #import <ProgressHUD/ProgressHUD.h>
 #import <JSQMessages.h>
 #import <APAddressBook-Bridging.h>
